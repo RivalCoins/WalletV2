@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+
 import Image from 'next/image';
 import { Horizon } from 'stellar-sdk';
 import styled from 'styled-components';
@@ -8,6 +9,7 @@ import humanizeNumber from 'helpers/humanizeNumber';
 import questionLogo from 'public/images/question-circle.png';
 import { AssetImage } from 'reducers/assetImages';
 import handleAssetImage from 'utils/handleAssetImage';
+import getAssetName from 'utils/getAssetName';
 import handleAssetAlt from 'utils/handleAssetAlt';
 
 const Container = styled.div`
@@ -29,32 +31,40 @@ const SvgContainer = styled.div`
 type AssetTriggerType = {
   asset: Horizon.BalanceLine;
   assetImages: AssetImage[];
+  showBalance?: boolean;
 };
 
-const AssetTrigger = ({ asset, assetImages }: AssetTriggerType) => (
-  <Container>
-    <div className="flex items-center">
-      <img
-        width={32}
-        height={32}
-        className="rounded-full"
-        alt={handleAssetAlt(asset)}
-        src={handleAssetImage(asset, assetImages)}
-      />
+const AssetTrigger = ({ asset, assetImages, showBalance = true }: AssetTriggerType) => {
+  // const [theAssetImages, setTheAssetImages] = useState(assetImages);
 
-      <div className="ml-2">
-        <span>{asset.asset_code || 'XLM'}</span>
+  console.log('AssetTrigger asset: ' + asset.asset_code + ":" + asset.asset_issuer);
+  console.log('AssetTrigger # images: ' + assetImages.length);
+  console.log('AssetTrigger 1st image: ' + assetImages[0].asset_code + ":" + assetImages[0].asset_issuer);
+  
+  return (
+    <Container>
+      <div className="flex items-center">
+        <img
+          width={32}
+          height={32}
+          className="rounded-full"
+          alt={handleAssetAlt(asset)}
+          src={handleAssetImage(asset, assetImages)}
+        />
 
-        <span className="text-primary-darker ml-[6px]">
-          {humanizeNumber(asset.balance)}
-        </span>
+        <div className="ml-2">
+          <span>{(getAssetName(asset, assetImages) || 'Fake XLM')}</span>
+
+          <span className="text-primary-darker ml-[6px]">
+            {showBalance ? humanizeNumber(asset.balance) : null}
+          </span>
+        </div>
       </div>
-    </div>
 
-    <SvgContainer>
-      <AngleDownBold />
-    </SvgContainer>
-  </Container>
-);
-
+      <SvgContainer>
+        <AngleDownBold />
+      </SvgContainer>
+    </Container>
+  );
+ }
 export default AssetTrigger;

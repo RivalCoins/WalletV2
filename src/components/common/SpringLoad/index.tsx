@@ -2,6 +2,7 @@ import React from 'react';
 import getOS from 'helpers/getOs';
 
 const { motion } = require('framer-motion');
+// import { motion} from 'framer-motion';
 
 type AppProps = {
   children: React.ReactNode;

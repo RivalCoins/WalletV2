@@ -1,3 +1,7 @@
+import getConfig from 'next/config'
+
+const { publicRuntimeConfig } = getConfig()
+
 const config = {
   DB_VERSION: 8,
   BASE_FEE: '50000',
@@ -6,10 +10,13 @@ const config = {
   SLIDESHOW_TRANSITION: 200,
   INTERVAL_TIME_SECONDS: 13,
   OFFLINE_MODE_TIMEOUT_SECONDS: 4,
-  ASSET_SERVER: 'https://asset.rabet.io/assets',
+  ASSET_SERVER: publicRuntimeConfig.ASSET_SERVER_URL,
+  DAPP_URL: publicRuntimeConfig.DAPP_URL,
+  FAKE_USA_ISSUER: publicRuntimeConfig.FAKE_USA_ISSUER as string,
+  FAKE_USA_WRAPPER_ISSUER: publicRuntimeConfig.FAKE_USA_WRAPPER_ISSUER as string,
   HORIZON: {
     mainnet: 'https://horizon.stellar.org',
-    testnet: 'https://horizon-testnet.stellar.org',
+    testnet: publicRuntimeConfig.HORIZON_URL,
   },
   STEEXP: {
     mainnet: 'https://steexp.com',

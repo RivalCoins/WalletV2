@@ -14,7 +14,7 @@ export default (
     if (network.includes('main') || network === Networks.PUBLIC) {
       stellarNetwork = Networks.PUBLIC;
     } else {
-      stellarNetwork = Networks.TESTNET;
+      stellarNetwork = 'Rival Coins Fake Network ; August 2023';
     }
 
     const transaction = new Transaction(obj, stellarNetwork);

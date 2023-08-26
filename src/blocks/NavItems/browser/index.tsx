@@ -21,6 +21,7 @@ import installRabet from 'actions/interactions/install';
 import Layout from 'components/common/Layouts/BaseLayout';
 import ApproveTransaction from 'blocks/ApproveTransaction';
 import addConnectedWebsite from 'actions/accounts/addConnectedWebsite';
+import config from 'config';
 
 import * as S from './styles';
 
@@ -42,12 +43,12 @@ const Browser = () => {
   const [result, setResult] = useState<'valid' | 'invalid' | 'empty'>(
     'valid',
   );
-  const [url, setUrl] = useState('https://dapps.rabet.io');
+  const [url, setUrl] = useState(config.DAPP_URL);
   const iframe = useRef();
   const [openConnect, setOpenConnect] = useState(false);
   const [openApprove, setOpenApprove] = useState(false);
   const [event, setEvent] = useState(null);
-  const [value, setValue] = useState('https://dapps.rabet.io');
+  const [value, setValue] = useState(config.DAPP_URL);
 
   const handleLoad = (e) => {
     setLoaded(true);
@@ -160,7 +161,7 @@ const Browser = () => {
   const handler = (e) => {
     if (
       e?.data?.type === 'redirect' &&
-      e?.origin === 'https://dapps.rabet.io'
+      e?.origin === 'https://localhost:7777'
     ) {
       const { href } = e?.data;
 

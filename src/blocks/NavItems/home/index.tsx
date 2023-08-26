@@ -65,8 +65,8 @@ const Home = ({ loading }: HomeProps) => {
           </Link>
         </S.Head>
         <S.Asset>
-          {handleAssetSymbol(currencies, options)}
           {formatBalance(totalBalance)}
+          {" \"Fake USA\""}
         </S.Asset>
 
         <S.LinkContainer>

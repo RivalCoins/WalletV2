@@ -1,4 +1,5 @@
 import store from 'store';
+import config from 'config';
 import getAccount from 'api/getAccount';
 import {
   IAccount,
@@ -42,6 +43,18 @@ const loadAccount = async (account: IAccount) => {
   assets = assets.filter(
     (asset) => asset.asset_type !== 'liquidity_pool_shares',
   );
+
+  // Move Fake USA to the second element
+  const fakeUsa = assets.find(
+    (asset) => asset.asset_code === 'FakeUSA' && asset.asset_issuer === config.FAKE_USA_ISSUER,
+  );
+  assets = assets.filter((asset) => asset != fakeUsa);
+
+  if (fakeUsa) {
+    assets.unshift({
+      ...fakeUsa,
+    });
+  }
 
   // Move XLM to the first element
   const nativeAsset = assets.find(

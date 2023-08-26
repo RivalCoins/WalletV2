@@ -26,12 +26,12 @@ import * as S from './styles';
 import validateForm from './validateForm';
 
 export type FormValues = {
-  path: any[];
-  to: string;
-  from: string;
-  minimumReceived: number;
-  asset1: Horizon.BalanceLine;
-  asset2: Horizon.BalanceLine;
+  path: any[];                  // order path from swap-out asset to swap-in asset
+  to: string;                   // amount to receive
+  from: string;                 // amount to send
+  minimumReceived: number;      // minimum amount to receive
+  asset1: Horizon.BalanceLine;  // swap out asset
+  asset2: Horizon.BalanceLine;  // swap in asset
 };
 
 declare global {
@@ -44,8 +44,8 @@ const BasicSwap = () => {
   const router = useRouter();
   const account = useActiveAccount();
   const [assets] = useState(() => {
-    const accountAssets = account.assets || [];
-
+    const accountAssets = (account.assets || []).filter((asset) => asset.asset_type != 'native');
+  
     const assetsPlusDefaultAssets = combineAssets(
       accountAssets,
       defaultAssets,
@@ -214,7 +214,7 @@ const BasicSwap = () => {
               <div className="text-primary-dark">Max:</div>
               <div className="ml-[5px]">
                 {humanizeAmount(getMaxBalance(v.asset1, account))}{' '}
-                {v.asset1.asset_code || 'XLM'}
+                {(v.asset1.asset_code == 'XLM' ? 'Fake XLM' : v.asset1.asset_code) || 'Fake XLM'}
               </div>
             </div>
           </div>

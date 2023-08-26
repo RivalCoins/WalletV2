@@ -3,6 +3,7 @@ import { Horizon } from 'stellar-sdk';
 
 import BN from 'helpers/BN';
 import { Bid } from 'reducers/bids';
+import config from 'config';
 
 type LoadAssetbalanceType = {
   asset: Horizon.BalanceLine;
@@ -19,7 +20,11 @@ const loadAssetBalance = ({
     return '0';
   }
 
-  if (asset.asset_type === 'native') {
+  if (asset.asset_type === 'native' 
+    // Fake USA
+    || (asset.asset_code == 'FakeUSA' && asset.asset_issuer == config.FAKE_USA_ISSUER)
+    // Fake USA Rival Coins
+    || asset.asset_issuer == config.FAKE_USA_WRAPPER_ISSUER) {
     const price = new BN(asset.balance).times(currencyPrice);
 
     return price;

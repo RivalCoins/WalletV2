@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
+import { Asset, Horizon } from 'stellar-sdk';
 
 import shorter from 'helpers/shorter';
 import showName from 'helpers/showName';
@@ -13,9 +14,15 @@ import useActiveAccount from 'hooks/useActiveAccount';
 import handleAssetImage from 'utils/handleAssetImage';
 import Layout from 'components/common/Layouts/BaseLayout';
 import basicSendAction from 'actions/operations/basicSend';
+import { StrictSendInfo } from 'actions/operations/strictSend';
+import strictSend from 'actions/operations/strictSend';
+import getAccount from 'api/getAccount';
+import getAssetImages from 'api/getAssetImages';
+import config from 'config';
 
 import * as S from './styles';
 import ConfirmLayout from './Layout';
+import { pathPaymentStrictSend } from 'staticRes/operations';
 
 const BasicConfirmSend = () => {
   const router = useRouter();
@@ -24,66 +31,62 @@ const BasicConfirmSend = () => {
     (store) => [store.accounts, store.contacts, store.assetImages],
   );
 
-  const values = {
-    memo: '',
-    amount: '1',
-    destination: 'abcd',
-    isAccountNew: false,
-    assetCode: 'XLM',
-    assetType: 'native',
-    assetIssuer: '',
-  };
+  const values = { 
+    op: { },
+    memo: "",
+  } as StrictSendInfo;
 
   if (router.query.memo) {
     values.memo = router.query.memo;
   }
 
   if (router.query.amount) {
-    values.amount = router.query.amount;
+    values.op.sendAmount = router.query.amount;
+    console.log("send amount passed: " + router.query.amount);
+    console.log("send amount set: " + values.op.sendAmount);
+    values.op.destMin = router.query.amount;
+  }
+  else {
+    console.log("send amount NOT passed!");
   }
 
   if (router.query.destination) {
-    values.destination = router.query.destination;
+    values.op.destination = router.query.destination;
   }
 
-  if (router.query.isAccountNew) {
-    values.isAccountNew = router.query.isAccountNew === 'true';
+  if (router.query.assetCode && router.query.assetType && router.query.assetIssuer) {
+    values.op.sendAsset = new Asset(router.query.assetCode, router.query.assetIssuer);
   }
 
-  if (router.query.assetCode) {
-    values.assetCode = router.query.assetCode;
+  if (router.query.destinationAssetCode && router.query.destinationAssetIssuer) {
+    values.op.destAsset = new Asset(router.query.destinationAssetCode, router.query.destinationAssetIssuer);
   }
 
-  if (router.query.assetType) {
-    values.assetType = router.query.assetType;
+  if(values.op.sendAsset.code == "FakeUSA") {
+    values.op.path = new Array<Asset>();
+  } else {
+    values.op.path = Array(1).fill(new Asset("FakeUSA", config.FAKE_USA_ISSUER))
   }
 
-  if (router.query.assetIssuer) {
-    values.assetIssuer = router.query.assetIssuer;
-  }
+  // console.log("BasicConfirmSend - getting account");
+  // const destinationAccount = currentAccount; // await getAccount(values.op.destination);
+  // console.log("BasicConfirmSend - retrieved account");
+  // const accountAssets = destinationAccount?.assets || [];
 
-  const accountAssets = currentAccount.assets || [];
+  // let selectedAsset = accountAssets.find(
+  //   (x) => x.asset_type === 'native',
+  // );
 
-  let selectedAsset = accountAssets.find(
-    (x) => x.asset_type === 'native',
-  );
-
-  if (values.assetType !== 'native') {
-    selectedAsset = accountAssets.find(
-      (x) =>
-        x.asset_type === values.assetType &&
-        x.asset_code === values.assetCode &&
-        x.asset_issuer === values.assetIssuer,
-    );
-  }
+  const selectedAsset = { asset_code: values.op.destAsset.code, asset_issuer: values.op.destAsset.issuer } as Horizon.BalanceLineAsset<"credit_alphanum12">;
+  const selectedAssetImage = { name: router.query.destinationAssetName, logo: router.query.destinationAssetLogo };
 
   const showDestination = () => {
     const userAccount = accounts.find(
-      (act) => act.publicKey === values.destination,
+      (act) => act.publicKey === values.op.destination,
     );
 
     const contactAccount = contacts.find(
-      (cnt) => cnt.publicKey === values.destination,
+      (cnt) => cnt.publicKey === values.op.destination,
     );
 
     if (contactAccount) {
@@ -94,16 +97,29 @@ const BasicConfirmSend = () => {
       return showName(userAccount.name);
     }
 
-    return shorter(values.destination, 4);
+    return shorter(values.op.destination, 4);
   };
 
   const onSubmit = async () => {
     router.push(RouteName.LoadingNetwork);
 
-    const [isDone, message] = await basicSendAction({
-      ...values,
-      asset: selectedAsset,
-    });
+    console.log('Send - destination asset');
+
+    console.log('Send - before swap');
+
+    const [isDone, message] =
+      values.op.sendAsset.code == values.op.destAsset.code && values.op.sendAsset.issuer == values.op.destAsset.issuer 
+      ? await basicSendAction({
+          asset: values.op.sendAsset,
+          destination: values.op.destination,
+          amount: values.op.sendAmount,
+          isAccountNew: false,
+          memo: values.memo,
+        })
+        :  
+        await strictSend(values);
+
+    console.log('Send - after swap');
 
     router.push({
       pathname: isDone ? RouteName.Success : RouteName.Error,
@@ -121,14 +137,14 @@ const BasicConfirmSend = () => {
           <S.Value>
             {selectedAsset ? (
               <>
-                {humanizeAmount(values.amount)}
+                {humanizeAmount(values.op.sendAmount)}
 
                 <S.Image
                   alt={handleAssetAlt(selectedAsset)}
-                  src={handleAssetImage(selectedAsset, assetImages)}
+                  src={selectedAssetImage.logo as string}
                 />
                 <span className="text-lg font-normal">
-                  {selectedAsset.asset_code}
+                  {selectedAssetImage.name}
                 </span>
               </>
             ) : (
@@ -140,7 +156,7 @@ const BasicConfirmSend = () => {
 
           <S.Label>To</S.Label>
           <CopyText
-            text={values.destination}
+            text={values.op.destination}
             custom={
               <span className="text-lg font-medium">
                 {showDestination()}

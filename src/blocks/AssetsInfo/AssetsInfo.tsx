@@ -170,11 +170,9 @@ const AssetInfo = ({
             </S.ImgContainer>
           </S.Circle>
           <p className="text-base">
-            <strong className="text-lg">XLM</strong> is the native
-            currency of the network. XLM is the only asset type that
-            can be used on the Stellar network that doesn&apos;t
-            require an issuer or a trustline. Any account can hold
-            XLM. You can trade XLM for other assets in the network.
+            <strong className="text-lg">Fake XLM</strong> is used to 
+            simulate "payment" for transactions.  It has no market
+            value, nor will it ever.
           </p>
         </S.Container>
       </div>

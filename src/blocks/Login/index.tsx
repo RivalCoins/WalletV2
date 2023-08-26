@@ -45,7 +45,7 @@ const Login = () => {
         Welcome back!
       </h1>
       <p className="text-sm text-primary-dark text-center mt-[6px]">
-        Log back into your future in finance
+        Let the rivalries begin!
       </p>
 
       <Form

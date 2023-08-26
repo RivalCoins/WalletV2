@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import BN from 'helpers/BN';
 import getAccount from 'api/getAccount';
+import getStrictSend from 'api/getStrictSend';
 import RouteName from 'staticRes/routes';
 import Error from 'components/common/Error';
 import Input from 'components/common/Input';
@@ -23,6 +24,7 @@ import ScrollBar from 'components/common/ScrollBar';
 import SelectAsset from '../SelectAsset';
 import AssetTrigger from './AssetTrigger';
 import DestinationSuggest from './DestinationSuggestion';
+import getAssetImages from 'api/getAssetImages';
 
 const InputMock = styled.div`
   border-radius: 2px;
@@ -42,14 +44,21 @@ const BasicSend = () => {
   const [isAccountNew, setIsAccountNew] = useState(false);
   const assetImages = useTypedSelector((store) => store.assetImages);
   const [openDestination, setOpenDestination] = useState(false);
+  const [destinationAssets, setDestinationAssets] = useState((account.assets || []).filter(asset => asset.asset_type != "native"));
+  const [destinationAssetsImages, setDestinationAssetImages] = useState((assetImages || []).filter(asset => asset.asset_code != "XLM"));
+  const [selectedDestinationAsset, setSelectedDestinationAsset] = useState(destinationAssets[0]);
+  const [showDestinationAssets, setShowDestinationAssets] = useState(false);
 
   const onOpenDestination = () => setOpenDestination(true);
 
-  const assets = account.assets || [];
+  const assets = (account.assets || []).filter((asset) => asset.asset_type != 'native');
 
   const [selectedAsset, setSelectedAsset] = useState(assets[0]);
 
   const onSubmit = async (v: FormValues) => {
+    var destinationAssetImage = destinationAssetsImages.find(a =>
+      a.asset_code == selectedDestinationAsset.asset_code && a.asset_issuer == selectedDestinationAsset.asset_issuer);
+
     const values = {
       memo: v.memo ? v.memo.trim() : '',
       amount: v.amount,
@@ -58,6 +67,11 @@ const BasicSend = () => {
       assetCode: selectedAsset.asset_code,
       assetType: selectedAsset.asset_type,
       assetIssuer: selectedAsset.asset_issuer,
+      destinationAssetCode: selectedDestinationAsset.asset_code,
+      destinationAssetType: selectedDestinationAsset.asset_type,
+      destinationAssetIssuer: selectedDestinationAsset.asset_issuer,
+      destinationAssetName: destinationAssetImage?.name,
+      destinationAssetLogo: destinationAssetImage.logo,
     };
 
     router.push({
@@ -74,6 +88,7 @@ const BasicSend = () => {
       amount: v.amount,
       asset: selectedAsset,
       destination: v.destination ? v.destination.trim() : '',
+      destinationAsset: selectedDestinationAsset,
     };
 
     const errors: Partial<FormValues> = {};
@@ -130,13 +145,13 @@ const BasicSend = () => {
       values,
       destinationAccount,
     );
-    if (!isAllowed && transferResult === 'INACTIVE') {
+    if (false && !isAllowed && transferResult === 'INACTIVE') {
       return {
         destination: 'Inactive accounts cannot receive tokens.',
       };
     }
 
-    if (!isAllowed && transferResult === 'NO_TRUST') {
+    if (false && !isAllowed && transferResult === 'NO_TRUST') {
       return {
         destination:
           'The destination account does not trust the asset you are attempting to send.',
@@ -150,10 +165,35 @@ const BasicSend = () => {
       };
     }
 
-    setIsAccountNew(transferResult === 'INACTIVE');
+    var foundPaymentPath = await getStrictSend({ asset1: values.asset, asset2: values.destinationAsset, from: values.amount, to: '' });
+    console.log('found path amount: ' + foundPaymentPath?.source_amount);
+    if (!foundPaymentPath) {
+      return {
+        destination:
+          `It's not possible to auto-swap ${values.asset.asset_code} for ${values.destinationAsset.asset_code}.`,
+      };
+    }
+
+    setIsAccountNew(true || transferResult === 'INACTIVE');
 
     return {};
   };
+
+  const refreshDestinationAssets = async (destination : string) => {
+    var account = await getAccount(destination);
+    var foundAssetImages = await getAssetImages(account?.balances || []);
+    var newDestinationAssets = (account?.balances || []).filter(b => b.asset_type != "native");
+
+    setDestinationAssetImages(foundAssetImages);
+    setDestinationAssets(newDestinationAssets);
+    setSelectedDestinationAsset(newDestinationAssets[0]);
+  }
+
+  const onDestinationPopupClose = (destination : string) => {
+    refreshDestinationAssets(destination).then(() => {
+      setShowDestinationAssets(true);
+    });
+  }
 
   return (
     <Layout>
@@ -167,11 +207,15 @@ const BasicSend = () => {
             );
           },
           changeDestination: (args, state, tools) => {
-            tools.changeValue(state, 'destination', () => args[0]);
+            refreshDestinationAssets(args[0]).then(() => {
+              tools.changeValue(state, 'destination', () => args[0]);
 
-            if (args[1]) {
-              tools.changeValue(state, 'memo', () => args[1]);
-            }
+              if (args[1]) {
+                tools.changeValue(state, 'memo', () => args[1]);
+              }
+              
+              setShowDestinationAssets(true);
+            });
           },
         }}
         render={({
@@ -274,10 +318,29 @@ const BasicSend = () => {
                     }}
                     setOpen={setOpenDestination}
                     open={openDestination}
+                    onClose={onDestinationPopupClose}
                   />
                 </>
               )}
             </Field>
+
+            {showDestinationAssets ? (
+              <SelectAsset
+                assets={destinationAssets}
+                asset={selectedDestinationAsset}
+                onChange={setSelectedDestinationAsset}
+                customAssetImages={destinationAssetsImages}
+                customTrigger={
+                  <AssetTrigger
+                    asset={selectedDestinationAsset}
+                    assetImages={destinationAssetsImages}
+                    showBalance={false}
+                  />
+                }
+                showDomain={false}
+                showBalance={false}
+              />        
+              ) : <span/>}
 
             <Field name="memo">
               {({ input, meta }) => (

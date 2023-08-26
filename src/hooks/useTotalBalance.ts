@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import BN from 'helpers/BN';
 import { IAccount } from 'reducers/accounts2';
 import loadAssetBalance from 'features/loadAssetBalance';
+import config from 'config';
 
 import useActiveAccount from './useActiveAccount';
 import useTypedSelector from './useTypedSelector';
@@ -17,12 +18,17 @@ const useTotalBalance = (acc?: IAccount) => {
   ]);
   const [totalBalance, setTotalBalance] = useState('0');
   const activeCurrency = useActiveCurrency();
-  const currencyPrice = new BN(activeCurrency?.price || 0);
+  const currencyPrice = new BN(1.0);
 
   const account = acc || activeAccount;
 
   useEffect(() => {
-    const assets = account.assets || [];
+    const assets = (account.assets || []).filter((asset) =>
+      // Fake USA
+      (asset.asset_code == 'FakeUSA' && asset.asset_issuer == config.FAKE_USA_ISSUER)
+      ||
+      // Fake USA Rival Coins
+      (asset.asset_issuer == config.FAKE_USA_WRAPPER_ISSUER));
 
     let totalBalanceTemp = new BN(0);
 

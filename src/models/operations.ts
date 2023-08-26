@@ -1,7 +1,7 @@
-import { Horizon } from 'stellar-sdk';
+import { Asset } from 'stellar-sdk';
 
 export type SendValues = {
-  asset: Horizon.BalanceLine;
+  asset: Asset;
   isAccountNew: boolean;
   amount: string;
   destination: string;

@@ -16,6 +16,7 @@ type DestinationProps = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   input: any;
   meta: any;
+  onClose: (publicKey: string) => void;
 };
 
 const DestinationSuggest = ({
@@ -24,6 +25,7 @@ const DestinationSuggest = ({
   setOpen,
   input,
   meta,
+  onClose,
 }: DestinationProps) => {
   const [accounts, contacts] = useTypedSelector((store) => [
     store.accounts,
@@ -67,6 +69,8 @@ const DestinationSuggest = ({
 
   const onSubmit = () => {
     setOpen(false);
+
+    onClose(input.value + '');
   };
 
   return (

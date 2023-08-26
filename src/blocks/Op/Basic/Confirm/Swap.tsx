@@ -92,8 +92,8 @@ const BasicConfirmSwap = () => {
     });
   };
 
-  let asset1Code = 'XLM';
-  let asset2Code = 'XLM';
+  let asset1Code = 'Fake XLM';
+  let asset2Code = 'Fake XLM';
 
   if (
     asset1.asset_type === 'credit_alphanum4' ||

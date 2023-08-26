@@ -48,9 +48,7 @@ const Account = ({ account }: AppProps) => {
         </S.Name>
 
         <S.Amount>
-          {handleAssetSymbol(currencies, options)}
-
-          {formatBalance(totalBalance)}
+          {formatBalance(totalBalance)}{" \"Fake USA\""}
         </S.Amount>
       </S.Container>
 

@@ -31,6 +31,7 @@ const Asset = ({ asset, index }: AssetType) => {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   let asset_code: string;
+  let assetName: string;
   let isVerified = false;
 
   if (
@@ -47,9 +48,16 @@ const Asset = ({ asset, index }: AssetType) => {
     if (assetImageFound && assetImageFound.is_verified) {
       isVerified = true;
     }
+
+    if(assetImageFound) {
+      assetName = assetImageFound.name;
+    } else {
+      assetName = asset_code;
+    }
   } else {
     isVerified = true;
     asset_code = 'XLM';
+    assetName = 'Fake XLM';
   }
 
   return (
@@ -67,22 +75,24 @@ const Asset = ({ asset, index }: AssetType) => {
       <div className="flex justify-between items-center w-full">
         <div className="flex flex-col">
           <div className="inline-flex text-base">
+            <span className="text-primary-dark font-normal ml-1">
+                { assetName }
+            </span>
+          </div>
+          <div className="inline-flex text-base">
             <span className=" font-medium">
               {formatBalance(asset.balance)}
             </span>
-            <span className="text-primary-dark font-normal ml-1">
-              {asset_code}
-            </span>
-            {isVerified && (
+            {false && isVerified && (
               <div className="ml-1 mt-1">
                 <BlackCheck width="16" height="16" />
               </div>
             )}
           </div>
-          <div className="text-xs text-primary-dark mt-[2px]">
+          {false && (<div className="text-xs text-primary-dark mt-[2px]">
             {handleAssetSymbol(currencies, options)}
             {formatBalance(price)}
-          </div>
+          </div>)}
         </div>
       </div>
     </S.Container>

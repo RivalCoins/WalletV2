@@ -1,5 +1,5 @@
 {
-    "name": "Rabet",
+    "name": "Rival Coins",
     "display": "standalone",
     "icons": [
         {
@@ -43,6 +43,6 @@
     "theme_color": "#000000",
     "scope": "/",
     "start_url": "/home",
-    "short_name": "Rabet",
-    "description": "Rabet, an open source wallet for the Stellar network."
+    "short_name": "Rival Coins",
+    "description": "Rival Coins is a global popularity contest of people, brands, ideas, causes, and more! #MoneyTalks"
 }

@@ -16,7 +16,7 @@ export default () => {
   if (options.network === 'TESTNET') {
     return {
       url: config.HORIZON.testnet,
-      passphrase: StellarSdk.Networks.TESTNET,
+      passphrase: 'Rival Coins Fake Network ; August 2023',
     };
   }
 

@@ -16,7 +16,7 @@ export interface IOption {
 const initialState: IOption = {
   privacyMode: true,
   explorer: 'stellarexpert',
-  network: 'MAINNET',
+  network: 'TESTNET',
   autoTimeLocker: 60,
   currency: 'USD',
   mode: 'BASIC',

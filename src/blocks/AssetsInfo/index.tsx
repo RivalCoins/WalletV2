@@ -71,7 +71,7 @@ const AssetInfo = () => {
         onDelete={onDelete}
         onBeforeDelete={handleBeforeDelete}
       >
-        <ExitTitle title={`Assets | ${assetCode || 'XLM'}`} />
+        <ExitTitle title={`Assets | ${(assetCode == 'XLM' ? 'Fake XLM' : assetCode) || 'Fake XLM'}`} />
       </AssetInfoContent>
     </ScrollBar>
   );

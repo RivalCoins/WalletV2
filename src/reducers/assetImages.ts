@@ -9,6 +9,7 @@ export interface AssetImage {
   is_verified: boolean;
   trustline: number;
   description: string;
+  name: string;
 }
 
 export interface AssetImageWithActive extends AssetImage {

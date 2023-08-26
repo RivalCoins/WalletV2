@@ -2,11 +2,13 @@ import { Horizon } from 'stellar-sdk';
 import React, { useState } from 'react';
 
 import Image from 'components/common/Image';
+import { AssetImage } from 'reducers/assetImages';
 import formatBalance from 'utils/formatBalance';
 import handleAssetAlt from 'utils/handleAssetAlt';
 import ScrollBar from 'components/common/ScrollBar';
 import handleAssetsKeys from 'utils/handleAssetKeys';
 import handleAssetImage from 'utils/handleAssetImage';
+import getAssetName from 'utils/getAssetName';
 import useTypedSelector from 'hooks/useTypedSelector';
 import questionLogo from 'public/images/question-circle.png';
 
@@ -18,6 +20,9 @@ type AppProps = {
   onChange: (value: Horizon.BalanceLine) => void;
   valueName?: string;
   maxHeight: number;
+  customAssetImages?: AssetImage[];
+  showDomain?: boolean;
+  showBalance?: boolean;
 };
 
 const SearchAsset = ({
@@ -26,8 +31,14 @@ const SearchAsset = ({
   onChange,
   valueName,
   maxHeight,
+  customAssetImages,
+  showDomain,
+  showBalance,
 }: AppProps) => {
-  const assetImages = useTypedSelector((store) => store.assetImages);
+  const assetImages = customAssetImages || useTypedSelector((store) => store.assetImages);
+  console.log('SearchAsset - # asset images: ' + assetImages.length);
+  console.log('SearchAsset - showDomain: ' + showDomain);
+  console.log('SearchAsset - showBalance: ' + showBalance);
 
   const handleClick = (asset: Horizon.BalanceLine) => {
     onChange(asset);
@@ -70,12 +81,12 @@ const SearchAsset = ({
             />
 
             <div>
-              <S.AssetName>{asset.asset_code || 'XLM'}</S.AssetName>
+              <S.AssetName>{getAssetName(asset, assetImages) || 'Fake XLM'}</S.AssetName>
 
-              <S.AssetInfo>{handleShowDomain(asset)}</S.AssetInfo>
+              {showBalance ? <S.AssetInfo>{handleShowDomain(asset)}</S.AssetInfo> : null}
             </div>
           </S.Asset>
-          <S.AssetPrice>{formatBalance(asset.balance)}</S.AssetPrice>
+          {showBalance ? <S.AssetPrice>{formatBalance(asset.balance)}</S.AssetPrice> : null}
         </S.ListItem>
       ))}
 

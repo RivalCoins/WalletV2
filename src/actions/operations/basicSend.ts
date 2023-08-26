@@ -29,21 +29,8 @@ export default async (values: SendValues) => {
   });
 
   if (!values.isAccountNew) {
-    let asset;
-
-    if (values.asset.asset_type === 'native') {
-      asset = Asset.native();
-    } else if (values.asset.asset_type === 'liquidity_pool_shares') {
-      asset = Asset.native();
-    } else {
-      asset = new Asset(
-        values.asset.asset_code,
-        values.asset.asset_issuer,
-      );
-    }
-
     op = Operation.payment({
-      asset,
+      asset: values.asset,
       amount: values.amount,
       destination: values.destination,
     });

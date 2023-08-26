@@ -82,7 +82,7 @@ const SwapDetails = ({
   }
 
   const assetCode = (asset) =>
-    asset.asset_type === 'native' ? 'XLM' : asset.asset_code;
+    asset.asset_type === 'native' ? 'Fake XLM' : asset.asset_code;
 
   return (
     <S.Container>
@@ -119,7 +119,7 @@ const SwapDetails = ({
           {minimumReceived ? (
             <>
               {humanizeAmount(minimumReceived.toString())}{' '}
-              {formValues.asset2.asset_code || 'XLM'}
+              {formValues.asset2.asset_code || 'Fake XLM'}
             </>
           ) : (
             <p>Asset</p>
